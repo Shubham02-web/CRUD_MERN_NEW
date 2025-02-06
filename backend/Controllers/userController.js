@@ -4,6 +4,7 @@ import userModel from "../models/UserModel.js";
 import JWT from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import fs from "fs";
+import path from "path";
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -112,27 +113,35 @@ const updateUser = async (req, res) => {
     const { _id } = req.user;
     const { name, email } = req.body;
     console.log(_id, name, email);
-    const { Image } = `${req.file.filename}`;
+    const Image = `${req.file.filename}`;
+    console.log(Image);
     if (!_id)
       return res.status(400).json({
         success: false,
         message: "id not found on req.body",
       });
 
-    const user = await userModel.findById(_id).select("-password");
+    const user = await userModel.findById(_id);
+    const userImage = user.Image;
+
+    fs.unlink("uploads/" + user.Image, async () => {
+      console.log("Image Deleted succesfully");
+    });
+
     if (name) user.name = name;
     if (email) user.email = email;
-
     if (Image) {
-      fs.unlink(`image/+${user.Image}`, () => {
-        console.log("Image deleted successfully");
-      });
       user.Image = Image;
+      console.log("image updated ");
+    } else {
+      user.Image = userImage;
+      userImage = null;
     }
-    await user.save();
+
+    user.save();
     res.status(200).json({
       success: true,
-      message: "user updated  :  " + user,
+      user,
     });
   } catch (error) {
     console.log("Error in update user : " + error.message);
@@ -142,7 +151,7 @@ const updateUser = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const { _id } = req.user;
-    const user = await userModel.findById(_id).select("-password");
+    const user = await userModel.findById(_id);
     if (!user)
       return res.status(400).json({
         success: false,
@@ -198,7 +207,7 @@ const removeUser = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "user deleted succesfully with id : " + id + " user : " + user,
+      user,
     });
   } catch (error) {
     console.log(error.message);
@@ -213,6 +222,20 @@ const changePassword = async (req, res) => {
   try {
     const { _id } = req.user;
     const { currPassword, newPassword, conformPassword } = req.body;
+    if (!currPassword || !newPassword || !conformPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "please enter all field ",
+      });
+    }
+
+    if (newPassword !== conformPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "new password and conformed password not matched",
+      });
+    }
+
     const user = await userModel.findById(_id);
     if (!user)
       return res.status(400).json({
@@ -228,22 +251,18 @@ const changePassword = async (req, res) => {
         message: "incorrect current password",
       });
 
-    if (newPassword !== conformPassword)
-      return res.status(400).json({
-        success: false,
-        message: "newPassword and conformPassword mismatch",
-      });
-
-    user.password = newPassword;
-    await user.save();
+    const newHashedPass = await bcrypt.hash(newPassword, 10);
+    await userModel.findByIdAndUpdate(_id, { password: newHashedPass });
 
     res.status(201).json({
       success: true,
-      message: "password change for user : " + user,
+      message: "Pass change ",
     });
+
+    console.log("pass change");
   } catch (error) {
     console.log("error in change Password API" + error.message);
-    res.json({
+    return res.status(500).json({
       success: false,
       message: "Error in Change Password " + error.message,
     });

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
+import "../index.css";
 const Register = () => {
   const [data, setData] = useState({
     name: "",
@@ -47,10 +48,13 @@ const Register = () => {
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      <div>
+    <form
+      onSubmit={onSubmit}
+      className="container flex flex-col   p-20 items-center  justify-center w-3/6 bg-pink-200 mt-5 content-center ml-96 rounded-3xl"
+    >
+      <div className="flex items-center justify-center text-center gap-8 flex-col ">
         {signup && (
-          <div>
+          <div className="flex items-center justify-center text-center gap-8 flex-col ">
             <input
               type="text"
               name="name"

@@ -18,5 +18,5 @@ userRoute.put("/update", isAuth, upload.single("Image"), updateUser);
 userRoute.get("/all", isAuth, isAdmin, getAllUser);
 userRoute.get("/profile", isAuth, getProfile);
 userRoute.delete("/remove/:id", isAuth, isAdmin, removeUser);
-userRoute.post("/passchange", isAuth, changePassword);
+userRoute.put("/passchange", isAuth, changePassword);
 export default userRoute;

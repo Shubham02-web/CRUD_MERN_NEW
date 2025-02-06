@@ -24,7 +24,7 @@ const Profile = () => {
     fetchUser();
   }, []);
   return (
-    <div>
+    <div className="container flex flex-col bg-blue-100 w-7/12 m-auto p-10 mt-3 font-sans font-semibold gap-6 items-center rounded-3xl">
       <h1>ID : {user._id}</h1>
       <h2>Name : {user.name}</h2>
       <h2>Email : {user.email}</h2>

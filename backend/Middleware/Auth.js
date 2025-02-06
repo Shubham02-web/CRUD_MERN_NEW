@@ -3,6 +3,7 @@ import userModel from "../models/UserModel.js";
 const isAuth = async (req, res, next) => {
   try {
     const token = `${req.headers.token}`;
+    // console.log(token);
     if (!token)
       res.status(400).json({
         success: false,
@@ -10,6 +11,7 @@ const isAuth = async (req, res, next) => {
       });
     const decode = JWT.verify(token, process.env.JWT_SECRET);
     if (decode) {
+      // console.log(decode);
       req.user = decode;
     }
     next();
